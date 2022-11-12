@@ -9,8 +9,15 @@ public class Frustrum : MonoBehaviour
 
     private const int maxFrustrumPlanes = 6;
     private const int maxTestObjests = 4;
+    private const int aabbPoints = 8;
 
     Plane[] planes = new Plane[maxFrustrumPlanes];
+
+    struct testObjet
+    {
+        GameObject testObject;
+        Vector3[] aabb;
+    }
 
     [SerializeField] Vector3 nearTopLeft;
     [SerializeField] Vector3 nearTopRight;
@@ -23,6 +30,16 @@ public class Frustrum : MonoBehaviour
     [SerializeField] Vector3 farBottomRight;
 
     [SerializeField] GameObject[] TestObjests = new GameObject[maxTestObjests];
+    [SerializeField] Vector3[] aabb = new Vector3[aabbPoints];
+    [SerializeField] Vector3[] aabb1 = new Vector3[aabbPoints];
+    [SerializeField] Vector3[] aabb2 = new Vector3[aabbPoints];
+    [SerializeField] Vector3[] aabb3 = new Vector3[aabbPoints];
+    [SerializeField] Vector3[] aabb4 = new Vector3[aabbPoints];
+    [SerializeField] Vector3[] aabb5 = new Vector3[aabbPoints];
+    [SerializeField] Vector3[] aabb6 = new Vector3[aabbPoints];
+    [SerializeField] Vector3[] aabb7 = new Vector3[aabbPoints];
+
+    [SerializeField] testObjet[] testObjets = new testObjet[maxTestObjests];
 
     private void Awake()
     {
@@ -81,6 +98,14 @@ public class Frustrum : MonoBehaviour
         planes[4].Set3Points(cam.transform.position, farTopLeft, farTopRight);//top
         planes[5].Set3Points(cam.transform.position, farBottomRight, farTopLeft);//bottom
 
+        for (int i = 0; i < maxTestObjests; i++)
+        {
+            SetAABB(TestObjests[i],i);
+        }
+        for (int i = 0; i < maxTestObjests; i++)
+        {
+            CheckObjetColition(TestObjests[i],i);
+        }
     }
     public void SetNearPoints(Vector3 nearPos)
     {
@@ -114,6 +139,226 @@ public class Frustrum : MonoBehaviour
 
         farBottomRight = farPlaneDistance - (cam.transform.up * halfCameraHeightfar) + (cam.transform.right * CameraHalfWidthFar);
     }
+    public void SetAABB(GameObject currentObject,int number) 
+    {
+
+        Vector3 scale = currentObject.transform.localScale / 2;
+        Vector3 forward = currentObject.transform.forward;
+        Vector3 up = currentObject.transform.up;
+        Vector3 right = currentObject.transform.right;
+
+        switch (number)
+        {
+            case 0:
+                for (int i = 0; i < aabbPoints; i++)
+                {
+                    aabb[i] = currentObject.transform.position;
+                }
+
+                aabb[0] += scale.x * right + scale.y * up + scale.z * forward;
+                aabb[1] += scale.x * right + scale.y * up + -scale.z * forward;
+                aabb[2] += scale.x * right + -scale.y * up + scale.z * forward;
+                aabb[3] += scale.x * right + -scale.y * up + -scale.z * forward;
+                aabb[4] += -scale.x * right + scale.y * up + scale.z * forward;
+                aabb[5] += -scale.x * right + scale.y * up + -scale.z * forward;
+                aabb[6] += -scale.x * right + -scale.y * up + scale.z * forward;
+                aabb[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
+                break;
+            case 1:
+                for (int i = 0; i < aabbPoints; i++)
+                {
+                    aabb1[i] = currentObject.transform.position;
+                }
+
+                aabb1[0] += scale.x * right + scale.y * up + scale.z * forward;
+                aabb1[1] += scale.x * right + scale.y * up + -scale.z * forward;
+                aabb1[2] += scale.x * right + -scale.y * up + scale.z * forward;
+                aabb1[3] += scale.x * right + -scale.y * up + -scale.z * forward;
+                aabb1[4] += -scale.x * right + scale.y * up + scale.z * forward;
+                aabb1[5] += -scale.x * right + scale.y * up + -scale.z * forward;
+                aabb1[6] += -scale.x * right + -scale.y * up + scale.z * forward;
+                aabb1[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
+                break;
+            case 2:
+                for (int i = 0; i < aabbPoints; i++)
+                {
+                    aabb2[i] = currentObject.transform.position;
+                }
+
+                aabb2[0] += scale.x * right + scale.y * up + scale.z * forward;
+                aabb2[1] += scale.x * right + scale.y * up + -scale.z * forward;
+                aabb2[2] += scale.x * right + -scale.y * up + scale.z * forward;
+                aabb2[3] += scale.x * right + -scale.y * up + -scale.z * forward;
+                aabb2[4] += -scale.x * right + scale.y * up + scale.z * forward;
+                aabb2[5] += -scale.x * right + scale.y * up + -scale.z * forward;
+                aabb2[6] += -scale.x * right + -scale.y * up + scale.z * forward;
+                aabb2[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
+                break;
+            case 3:
+                for (int i = 0; i < aabbPoints; i++)
+                {
+                    aabb3[i] = currentObject.transform.position;
+                }
+
+                aabb3[0] += scale.x * right + scale.y * up + scale.z * forward;
+                aabb3[1] += scale.x * right + scale.y * up + -scale.z * forward;
+                aabb3[2] += scale.x * right + -scale.y * up + scale.z * forward;
+                aabb3[3] += scale.x * right + -scale.y * up + -scale.z * forward;
+                aabb3[4] += -scale.x * right + scale.y * up + scale.z * forward;
+                aabb3[5] += -scale.x * right + scale.y * up + -scale.z * forward;
+                aabb3[6] += -scale.x * right + -scale.y * up + scale.z * forward;
+                aabb3[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
+                break;
+            case 4:
+                for (int i = 0; i < aabbPoints; i++)
+                {
+                    aabb4[i] = currentObject.transform.position;
+                }
+
+                aabb4[0] += scale.x * right + scale.y * up + scale.z * forward;
+                aabb4[1] += scale.x * right + scale.y * up + -scale.z * forward;
+                aabb4[2] += scale.x * right + -scale.y * up + scale.z * forward;
+                aabb4[3] += scale.x * right + -scale.y * up + -scale.z * forward;
+                aabb4[4] += -scale.x * right + scale.y * up + scale.z * forward;
+                aabb4[5] += -scale.x * right + scale.y * up + -scale.z * forward;
+                aabb4[6] += -scale.x * right + -scale.y * up + scale.z * forward;
+                aabb4[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
+                break;
+            case 5:
+                for (int i = 0; i < aabbPoints; i++)
+                {
+                    aabb5[i] = currentObject.transform.position;
+                }
+
+                aabb5[0] += scale.x * right + scale.y * up + scale.z * forward;
+                aabb5[1] += scale.x * right + scale.y * up + -scale.z * forward;
+                aabb5[2] += scale.x * right + -scale.y * up + scale.z * forward;
+                aabb5[3] += scale.x * right + -scale.y * up + -scale.z * forward;
+                aabb5[4] += -scale.x * right + scale.y * up + scale.z * forward;
+                aabb5[5] += -scale.x * right + scale.y * up + -scale.z * forward;
+                aabb5[6] += -scale.x * right + -scale.y * up + scale.z * forward;
+                aabb5[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
+                break;
+            case 6:
+                for (int i = 0; i < aabbPoints; i++)
+                {
+                    aabb6[i] = currentObject.transform.position;
+                }
+
+                aabb6[0] += scale.x * right + scale.y * up + scale.z * forward;
+                aabb6[1] += scale.x * right + scale.y * up + -scale.z * forward;
+                aabb6[2] += scale.x * right + -scale.y * up + scale.z * forward;
+                aabb6[3] += scale.x * right + -scale.y * up + -scale.z * forward;
+                aabb6[4] += -scale.x * right + scale.y * up + scale.z * forward;
+                aabb6[5] += -scale.x * right + scale.y * up + -scale.z * forward;
+                aabb6[6] += -scale.x * right + -scale.y * up + scale.z * forward;
+                aabb6[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
+                break;
+            case 7:
+                for (int i = 0; i < aabbPoints; i++)
+                {
+                    aabb7[i] = currentObject.transform.position;
+                }
+
+                aabb7[0] += scale.x * right + scale.y * up + scale.z * forward;
+                aabb7[1] += scale.x * right + scale.y * up + -scale.z * forward;
+                aabb7[2] += scale.x * right + -scale.y * up + scale.z * forward;
+                aabb7[3] += scale.x * right + -scale.y * up + -scale.z * forward;
+                aabb7[4] += -scale.x * right + scale.y * up + scale.z * forward;
+                aabb7[5] += -scale.x * right + scale.y * up + -scale.z * forward;
+                aabb7[6] += -scale.x * right + -scale.y * up + scale.z * forward;
+                aabb7[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
+                break;
+        }
+    }
+    public void CheckObjetColition(GameObject currentObject,int number) 
+    {
+        bool isInside = false;
+
+        for (int i = 0; i < aabbPoints; i++)
+        {
+            int counter = maxFrustrumPlanes;
+
+            for (int j = 0; j < maxFrustrumPlanes; j++)
+            {
+                switch (number)
+                {
+                    case 0:
+                        if (planes[j].GetSide(aabb[i]))
+                        {
+                            counter--;
+                        }
+                        break;
+                    case 1:
+                        if (planes[j].GetSide(aabb1[i]))
+                        {
+                            counter--;
+                        }
+                        break;
+                    case 2:
+                        if (planes[j].GetSide(aabb2[i]))
+                        {
+                            counter--;
+                        }
+                        break;
+                    case 3:
+                        if (planes[j].GetSide(aabb3[i]))
+                        {
+                            counter--;
+                        }
+                        break;
+                    case 4:
+                        if (planes[j].GetSide(aabb4[i]))
+                        {
+                            counter--;
+                        }
+                        break;
+                    case 5:
+                        if (planes[j].GetSide(aabb5[i]))
+                        {
+                            counter--;
+                        }
+                        break;
+                    case 6:
+                        if (planes[j].GetSide(aabb6[i]))
+                        {
+                            counter--;
+                        }
+                        break;
+                    case 7:
+                        if (planes[j].GetSide(aabb7[i]))
+                        {
+                            counter--;
+                        }
+                        break;
+                }
+
+            }
+
+            if (counter == 0)
+            {
+                Debug.Log("Está adentro");
+                isInside = true;
+                break;
+            }
+        }
+
+        if (isInside)
+        {
+            if (!currentObject.activeSelf)
+            {
+                currentObject.SetActive(true);
+            }
+        }
+        else
+        {
+            if (currentObject.activeSelf)
+            {
+                Debug.Log("Está afuera");
+                currentObject.SetActive(false);
+            }
+        }
+    }
     public void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
@@ -135,6 +380,8 @@ public class Frustrum : MonoBehaviour
 
         //Plano Inferior
         DrawPlane(nearBottomLeft, farBottomLeft, farBottomRight, nearBottomRight);
+
+        DrawAABB();
     }
     public void DrawPlane(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
     {
@@ -146,6 +393,45 @@ public class Frustrum : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawLine(p1, p3);
         Gizmos.DrawLine(p2, p4);
+        Gizmos.color = Color.green;
+    }
+    public void DrawAABB() 
+    {
+
+        Gizmos.color = Color.blue;
+
+        for (int i = 0; i < aabbPoints; i++)
+        {
+            Gizmos.DrawSphere(aabb[i], 0.2f);
+        }
+        for (int i = 0; i < aabbPoints; i++)
+        {
+            Gizmos.DrawSphere(aabb1[i], 0.2f);
+        }
+        for (int i = 0; i < aabbPoints; i++)
+        {
+            Gizmos.DrawSphere(aabb2[i], 0.2f);
+        }
+        for (int i = 0; i < aabbPoints; i++)
+        {
+            Gizmos.DrawSphere(aabb3[i], 0.2f);
+        }
+        for (int i = 0; i < aabbPoints; i++)
+        {
+            Gizmos.DrawSphere(aabb4[i], 0.2f);
+        }
+        for (int i = 0; i < aabbPoints; i++)
+        {
+            Gizmos.DrawSphere(aabb5[i], 0.2f);
+        }
+        for (int i = 0; i < aabbPoints; i++)
+        {
+            Gizmos.DrawSphere(aabb6[i], 0.2f);
+        }
+        for (int i = 0; i < aabbPoints; i++)
+        {
+            Gizmos.DrawSphere(aabb7[i], 0.2f);
+        }
         Gizmos.color = Color.green;
     }
 }
