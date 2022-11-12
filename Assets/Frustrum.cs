@@ -8,9 +8,10 @@ public class Frustrum : MonoBehaviour
     Camera cam;
 
     private const int maxFrustrumPlanes = 6;
+    private const int maxTestObjests = 4;
 
     Plane[] planes = new Plane[maxFrustrumPlanes];
-    GameObject[] drawingPlanes = new GameObject[maxFrustrumPlanes];
+
     [SerializeField] Vector3 nearTopLeft;
     [SerializeField] Vector3 nearTopRight;
     [SerializeField] Vector3 nearBottomLeft;
@@ -20,6 +21,8 @@ public class Frustrum : MonoBehaviour
     [SerializeField] Vector3 farTopRight;
     [SerializeField] Vector3 farBottomLeft;
     [SerializeField] Vector3 farBottomRight;
+
+    [SerializeField] GameObject[] TestObjests = new GameObject[maxTestObjests];
 
     private void Awake()
     {
@@ -50,7 +53,6 @@ public class Frustrum : MonoBehaviour
 
         planes[5] = new Plane(cam.transform.position, -Vector3.Cross(frontMultFar + cam.transform.up * halfCameraHeight, cam.transform.right));
 
-        //DrawPlanes(nearPos,farPos);
     }
 
 
@@ -88,21 +90,13 @@ public class Frustrum : MonoBehaviour
 
         Vector3 nearPlaneDistance = cam.transform.position + (cam.transform.forward * cam.nearClipPlane);
 
-        nearTopLeft.x = nearPlaneDistance.x + (cam.transform.up.x * halfCameraHeightNear) - (cam.transform.right.x * CameraHalfWidthNear);
-        nearTopLeft.y = nearPlaneDistance.y + (cam.transform.up.y * halfCameraHeightNear) - (cam.transform.right.y * CameraHalfWidthNear);
-        nearTopLeft.z = nearPlaneDistance.z + (cam.transform.up.z * halfCameraHeightNear) - (cam.transform.right.z * CameraHalfWidthNear);
+        nearTopLeft = nearPlaneDistance + (cam.transform.up * halfCameraHeightNear) - (cam.transform.right * CameraHalfWidthNear);
 
-        nearTopRight.x = nearPlaneDistance.x + (cam.transform.up.x * halfCameraHeightNear) + (cam.transform.right.x * CameraHalfWidthNear);
-        nearTopRight.y = nearPlaneDistance.y + (cam.transform.up.y * halfCameraHeightNear) + (cam.transform.right.y * CameraHalfWidthNear);
-        nearTopRight.z = nearPlaneDistance.z + (cam.transform.up.z * halfCameraHeightNear) + (cam.transform.right.z * CameraHalfWidthNear);
+        nearTopRight = nearPlaneDistance + (cam.transform.up * halfCameraHeightNear) + (cam.transform.right * CameraHalfWidthNear);
 
-        nearBottomLeft.x = nearPlaneDistance.x - (cam.transform.up.x * halfCameraHeightNear) - (cam.transform.right.x * CameraHalfWidthNear);
-        nearBottomLeft.y = nearPlaneDistance.y - (cam.transform.up.y * halfCameraHeightNear) - (cam.transform.right.y * CameraHalfWidthNear);
-        nearBottomLeft.z = nearPlaneDistance.z - (cam.transform.up.z * halfCameraHeightNear) - (cam.transform.right.z * CameraHalfWidthNear);
+        nearBottomLeft = nearPlaneDistance - (cam.transform.up * halfCameraHeightNear) - (cam.transform.right * CameraHalfWidthNear);
 
-        nearBottomRight.x = nearPlaneDistance.x - (cam.transform.up.x * halfCameraHeightNear) + (cam.transform.right.x * CameraHalfWidthNear);
-        nearBottomRight.y = nearPlaneDistance.y - (cam.transform.up.y * halfCameraHeightNear) + (cam.transform.right.y * CameraHalfWidthNear);
-        nearBottomRight.z = nearPlaneDistance.z - (cam.transform.up.z * halfCameraHeightNear) + (cam.transform.right.z * CameraHalfWidthNear);
+        nearBottomRight = nearPlaneDistance - (cam.transform.up * halfCameraHeightNear) + (cam.transform.right * CameraHalfWidthNear);
     }
     public void SetFarPoints(Vector3 farPos)
     {
@@ -111,21 +105,14 @@ public class Frustrum : MonoBehaviour
 
         Vector3 farPlaneDistance = cam.transform.position + (cam.transform.forward * cam.farClipPlane);
 
-        farTopLeft.x = farPlaneDistance.x + (cam.transform.up.x * halfCameraHeightfar) - (cam.transform.right.x * CameraHalfWidthFar);
-        farTopLeft.y = farPlaneDistance.y + (cam.transform.up.y * halfCameraHeightfar) - (cam.transform.right.y * CameraHalfWidthFar);
-        farTopLeft.z = farPlaneDistance.z + (cam.transform.up.z * halfCameraHeightfar) - (cam.transform.right.z * CameraHalfWidthFar);
 
-        farTopRight.x = farPlaneDistance.x + (cam.transform.up.x * halfCameraHeightfar) + (cam.transform.right.x * CameraHalfWidthFar);
-        farTopRight.y = farPlaneDistance.y + (cam.transform.up.y * halfCameraHeightfar) + (cam.transform.right.y * CameraHalfWidthFar);
-        farTopRight.z = farPlaneDistance.z + (cam.transform.up.z * halfCameraHeightfar) + (cam.transform.right.z * CameraHalfWidthFar);
+        farTopLeft = farPlaneDistance + (cam.transform.up * halfCameraHeightfar) - (cam.transform.right * CameraHalfWidthFar);
 
-        farBottomLeft.x = farPlaneDistance.x - (cam.transform.up.x * halfCameraHeightfar) - (cam.transform.right.x * CameraHalfWidthFar);
-        farBottomLeft.y = farPlaneDistance.y - (cam.transform.up.y * halfCameraHeightfar) - (cam.transform.right.y * CameraHalfWidthFar);
-        farBottomLeft.z = farPlaneDistance.z - (cam.transform.up.z * halfCameraHeightfar) - (cam.transform.right.z * CameraHalfWidthFar);
+        farTopRight = farPlaneDistance + (cam.transform.up * halfCameraHeightfar) + (cam.transform.right * CameraHalfWidthFar);
 
-        farBottomRight.x = farPlaneDistance.x - (cam.transform.up.x * halfCameraHeightfar) + (cam.transform.right.x * CameraHalfWidthFar);
-        farBottomRight.y = farPlaneDistance.y - (cam.transform.up.y * halfCameraHeightfar) + (cam.transform.right.y * CameraHalfWidthFar);
-        farBottomRight.z = farPlaneDistance.z - (cam.transform.up.z * halfCameraHeightfar) + (cam.transform.right.z * CameraHalfWidthFar);
+        farBottomLeft = farPlaneDistance - (cam.transform.up * halfCameraHeightfar) - (cam.transform.right * CameraHalfWidthFar);
+
+        farBottomRight = farPlaneDistance - (cam.transform.up * halfCameraHeightfar) + (cam.transform.right * CameraHalfWidthFar);
     }
     public void OnDrawGizmos()
     {
@@ -155,26 +142,10 @@ public class Frustrum : MonoBehaviour
         Gizmos.DrawLine(p2, p3);
         Gizmos.DrawLine(p3, p4);
         Gizmos.DrawLine(p4, p1);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(p1, p3);
+        Gizmos.DrawLine(p2, p4);
+        Gizmos.color = Color.green;
     }
-    //public void DrawPlane(Vector3 position, Vector3 normal)
-    //{
-    //    Vector3 v3;
-    //    if (normal.normalized != Vector3.forward)
-    //        v3 = Vector3.Cross(normal, Vector3.forward).normalized * normal.magnitude;
-    //    else
-    //        v3 = Vector3.Cross(normal, Vector3.up).normalized * normal.magnitude; ;
-    //    var corner0 = position + v3;
-    //    var corner2 = position - v3;
-    //    var q = Quaternion.AngleAxis(90.0f, normal);
-    //    v3 = q * v3;
-    //    var corner1 = position + v3;
-    //    var corner3 = position - v3;
-    //    Debug.DrawLine(corner0, corner2, Color.green);
-    //    Debug.DrawLine(corner1, corner3, Color.green);
-    //    Debug.DrawLine(corner0, corner1, Color.green);
-    //    Debug.DrawLine(corner1, corner2, Color.green);
-    //    Debug.DrawLine(corner2, corner3, Color.green);
-    //    Debug.DrawLine(corner3, corner0, Color.green);
-    //    Debug.DrawRay(position, normal, Color.red);
-    //}
 }
