@@ -13,11 +13,12 @@ public class Frustrum : MonoBehaviour
 
     Plane[] planes = new Plane[maxFrustrumPlanes];
     [SerializeField] GameObject[] TestObjests = new GameObject[maxTestObjests];
-
+    [SerializeField] public bool showPoints;
     public struct testObject
     {
         public GameObject gameObject;
         public MeshRenderer meshRenderer;
+        public MeshFilter meshFilter;
         public Vector3[] aabb;
         public Vector3 v3Extents;
         public Vector3 scale;
@@ -46,6 +47,7 @@ public class Frustrum : MonoBehaviour
         {
             testObjets[i].gameObject = TestObjests[i];
             testObjets[i].meshRenderer = TestObjests[i].GetComponent<MeshRenderer>();
+            testObjets[i].meshFilter = TestObjests[i].GetComponent<MeshFilter>();
             testObjets[i].aabb = new Vector3[aabbPoints];
             testObjets[i].v3Extents = testObjets[i].meshRenderer.bounds.extents;
             testObjets[i].scale = testObjets[i].meshRenderer.bounds.size;
@@ -212,9 +214,24 @@ public class Frustrum : MonoBehaviour
 
         if (isInside)
         {
-            if (!currentObject.gameObject.activeSelf)
+            for (int i = 0; i < currentObject.meshFilter.mesh.vertices.Length; i++)
             {
-                currentObject.gameObject.SetActive(true);
+                int counter = maxFrustrumPlanes;
+
+                for (int j = 0; j < maxFrustrumPlanes; j++)
+                {
+                    if (planes[j].GetSide(currentObject.gameObject.transform.TransformPoint(currentObject.meshFilter.mesh.vertices[i])))
+                    {
+                        counter--;
+                    }
+                }
+
+                if (counter == 0)
+                {
+                    Debug.Log("Está adentro vert ");
+                    currentObject.gameObject.SetActive(true);
+                    break;
+                }
             }
         }
         else
@@ -254,6 +271,17 @@ public class Frustrum : MonoBehaviour
         for (int i = 0; i < maxTestObjests; i++)
         {
             DrawAABB(ref testObjets[i]);
+        }
+
+        if (showPoints)
+        {
+            for (int i = 0; i < maxTestObjests; i++)
+            {
+                if (testObjets[i].gameObject.active)
+                {
+                    DrawVert(testObjets[i]);
+                }
+            }
         }
     }
     public void DrawPlane(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
@@ -295,6 +323,22 @@ public class Frustrum : MonoBehaviour
         Gizmos.DrawLine(currentObject.aabb[5], currentObject.aabb[1]);
 
         Gizmos.color = Color.green;
-    }
 
+
+
+    }
+    public void DrawVert(testObject currentObject)
+    {
+
+        Gizmos.color = Color.red;
+
+        MeshFilter mesh = currentObject.gameObject.GetComponent<MeshFilter>();
+
+        for (int i = 0; i < mesh.mesh.vertices.Length; i++)
+        {
+            Gizmos.DrawSphere(currentObject.gameObject.transform.TransformPoint(mesh.mesh.vertices[i]), 0.05f);
+        }
+
+        Gizmos.color = Color.green;
+    }
 }
