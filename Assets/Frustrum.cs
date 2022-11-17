@@ -33,11 +33,7 @@ public class Frustrum : MonoBehaviour
     [SerializeField] Vector3 farBottomLeft;
     [SerializeField] Vector3 farBottomRight;
 
-    [SerializeField] Vector3[] aabb = new Vector3[aabbPoints];
-
     [SerializeField] testObject[] testObjets = new testObject[maxTestObjests];
-
-    bool rancio = true;
 
     private void Awake()
     {
@@ -46,9 +42,6 @@ public class Frustrum : MonoBehaviour
 
     void Start()
     {
-
-
-
         for (int i = 0; i < maxTestObjests; i++)
         {
             testObjets[i].gameObject = TestObjests[i];
@@ -58,29 +51,10 @@ public class Frustrum : MonoBehaviour
             testObjets[i].scale = testObjets[i].meshRenderer.bounds.size;
         }
 
-        //Debug.Log("Tamanio  en y :" + testObjets[3].meshRenderer.bounds.size.y);
-
-        float halfCameraHeight = cam.farClipPlane * MathF.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
-        float CameraWidth = (halfCameraHeight * 2) * cam.aspect;
-        Vector3 frontMultFar = cam.farClipPlane * cam.transform.forward;
-
-
-        Vector3 nearPos = cam.transform.position;
-        nearPos += cam.transform.forward * cam.nearClipPlane;
-        planes[0] = new Plane(cam.transform.forward, nearPos);
-
-        Vector3 farPos = cam.transform.position;
-        farPos += (cam.transform.forward) * cam.farClipPlane;
-        planes[1] = new Plane(cam.transform.forward * -1, farPos);
-
-        planes[2] = new Plane(cam.transform.position, -Vector3.Cross(cam.transform.up, frontMultFar + cam.transform.right * CameraWidth));
-
-        planes[3] = new Plane(cam.transform.position, -Vector3.Cross(frontMultFar - cam.transform.right * CameraWidth, cam.transform.up));
-
-        planes[4] = new Plane(cam.transform.position, -Vector3.Cross(cam.transform.right, frontMultFar - cam.transform.up * halfCameraHeight));
-
-        planes[5] = new Plane(cam.transform.position, -Vector3.Cross(frontMultFar + cam.transform.up * halfCameraHeight, cam.transform.right));
-
+        for (int i = 0; i < maxFrustrumPlanes; i++)
+        {
+            planes[i] = new Plane();
+        }
     }
 
 
@@ -117,18 +91,6 @@ public class Frustrum : MonoBehaviour
         {
             CheckObjetColition(testObjets[i]);
         }
-
-        //if (rancio)
-        //{
-        //    for (int i = 0; i < 6; ++i)
-        //    {
-        //        GameObject p = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        //        p.name = "Plane " + i.ToString();
-        //        p.transform.position = -planes[i].normal * planes[i].distance;
-        //        p.transform.rotation = Quaternion.FromToRotation(Vector3.up, planes[i].normal);
-        //    }
-        //    rancio = false;
-        //}
 
         for (int i = 0; i < maxTestObjests; i++)
         {
@@ -171,37 +133,6 @@ public class Frustrum : MonoBehaviour
     {
 
 
-        //// Vector3 scale = (currentObject.gameObject.transform.localScale / 2);
-        //
-        //Vector3 scale = (currentObject.meshRenderer.bounds.extents);
-        //
-        ////scale.x *= (currentObject.meshRenderer.bounds.extents.x);
-        ////scale.y *= (currentObject.meshRenderer.bounds.extents.y);
-        ////scale.z *= (currentObject.meshRenderer.bounds.extents.z);
-        //
-        ////Debug.Log("Bound  " + currentObject.meshRenderer.bounds.size);
-        //
-        //Vector3 forward = currentObject.gameObject.transform.forward;
-        //Vector3 up = currentObject.gameObject.transform.up;
-        //Vector3 right = currentObject.gameObject.transform.right;
-        //
-        //for (int i = 0; i < aabbPoints; i++)
-        //{
-        //    currentObject.aabb[i] = currentObject.gameObject.transform.position;
-        //}
-        //
-        //currentObject.aabb[0] += scale.x * right + scale.y * up + scale.z * forward;
-        //currentObject.aabb[1] += scale.x * right + scale.y * up + -scale.z * forward;
-        //currentObject.aabb[2] += scale.x * right + -scale.y * up + scale.z * forward;
-        //currentObject.aabb[3] += scale.x * right + -scale.y * up + -scale.z * forward;
-        //currentObject.aabb[4] += -scale.x * right + scale.y * up + scale.z * forward;
-        //currentObject.aabb[5] += -scale.x * right + scale.y * up + -scale.z * forward;
-        //currentObject.aabb[6] += -scale.x * right + -scale.y * up + scale.z * forward;
-        //currentObject.aabb[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
-
-        Vector3 v3Center = currentObject.meshRenderer.bounds.center;
-        Vector3 v3Extents = currentObject.v3Extents;
-
         if (currentObject.scale != currentObject.gameObject.transform.localScale)
         {
             Quaternion rotation = currentObject.gameObject.transform.rotation;
@@ -211,15 +142,20 @@ public class Frustrum : MonoBehaviour
             currentObject.gameObject.transform.rotation = rotation;
         }
 
-        currentObject.aabb[0] = new Vector3(v3Center.x - v3Extents.x, v3Center.y + v3Extents.y, v3Center.z - v3Extents.z);  // Front top left corner
-        currentObject.aabb[1] = new Vector3(v3Center.x + v3Extents.x, v3Center.y + v3Extents.y, v3Center.z - v3Extents.z);  // Front top right corner
-        currentObject.aabb[2] = new Vector3(v3Center.x - v3Extents.x, v3Center.y - v3Extents.y, v3Center.z - v3Extents.z);  // Front bottom left corner
-        currentObject.aabb[3] = new Vector3(v3Center.x + v3Extents.x, v3Center.y - v3Extents.y, v3Center.z - v3Extents.z);  // Front bottom right corner
-        currentObject.aabb[4] = new Vector3(v3Center.x - v3Extents.x, v3Center.y + v3Extents.y, v3Center.z + v3Extents.z);  // Back top left corner
-        currentObject.aabb[5] = new Vector3(v3Center.x + v3Extents.x, v3Center.y + v3Extents.y, v3Center.z + v3Extents.z);  // Back top right corner
-        currentObject.aabb[6] = new Vector3(v3Center.x - v3Extents.x, v3Center.y - v3Extents.y, v3Center.z + v3Extents.z);  // Back bottom left corner
-        currentObject.aabb[7] = new Vector3(v3Center.x + v3Extents.x, v3Center.y - v3Extents.y, v3Center.z + v3Extents.z);  // Back bottom right corner
+        Vector3 center = currentObject.meshRenderer.bounds.center;
+        Vector3 size = currentObject.v3Extents;
 
+        currentObject.aabb[0] = new Vector3(center.x - size.x, center.y + size.y, center.z - size.z);  // Front top left corner
+        currentObject.aabb[1] = new Vector3(center.x + size.x, center.y + size.y, center.z - size.z);  // Front top right corner
+        currentObject.aabb[2] = new Vector3(center.x - size.x, center.y - size.y, center.z - size.z);  // Front bottom left corner
+        currentObject.aabb[3] = new Vector3(center.x + size.x, center.y - size.y, center.z - size.z);  // Front bottom right corner
+        currentObject.aabb[4] = new Vector3(center.x - size.x, center.y + size.y, center.z + size.z);  // Back top left corner
+        currentObject.aabb[5] = new Vector3(center.x + size.x, center.y + size.y, center.z + size.z);  // Back top right corner
+        currentObject.aabb[6] = new Vector3(center.x - size.x, center.y - size.y, center.z + size.z);  // Back bottom left corner
+        currentObject.aabb[7] = new Vector3(center.x + size.x, center.y - size.y, center.z + size.z);  // Back bottom right corner
+
+
+        // tranformar las Posiciones en puntos en el espacio
         currentObject.aabb[0] = transform.TransformPoint(currentObject.aabb[0]);
         currentObject.aabb[1] = transform.TransformPoint(currentObject.aabb[1]);
         currentObject.aabb[2] = transform.TransformPoint(currentObject.aabb[2]);
@@ -229,6 +165,7 @@ public class Frustrum : MonoBehaviour
         currentObject.aabb[6] = transform.TransformPoint(currentObject.aabb[6]);
         currentObject.aabb[7] = transform.TransformPoint(currentObject.aabb[7]);
 
+        // Roto el punto en la direccion que rota el objeto (Punto a rotar , pivot en el que rota , angulo en cada eje)
         currentObject.aabb[0] = RotatePointAroundPivot(currentObject.aabb[0], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
         currentObject.aabb[1] = RotatePointAroundPivot(currentObject.aabb[1], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
         currentObject.aabb[2] = RotatePointAroundPivot(currentObject.aabb[2], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
@@ -291,6 +228,10 @@ public class Frustrum : MonoBehaviour
     }
     public void OnDrawGizmos()
     {
+        if (!Application.isPlaying)
+        {
+            return;
+        }
         Gizmos.color = Color.green;
 
         //Plano Cercano
@@ -322,9 +263,9 @@ public class Frustrum : MonoBehaviour
         Gizmos.DrawLine(p3, p4);
         Gizmos.DrawLine(p4, p1);
 
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(p1, p3);
-        Gizmos.DrawLine(p2, p4);
+        //Gizmos.color = Color.red;
+        //Gizmos.DrawLine(p1, p3);
+        //Gizmos.DrawLine(p2, p4);
         Gizmos.color = Color.green;
     }
     public void DrawAABB(ref testObject currentObject)
@@ -338,28 +279,22 @@ public class Frustrum : MonoBehaviour
             Gizmos.DrawSphere(currentObject.aabb[i], 0.05f);
         }
 
+
+        // Draw the AABB Box 
+        Gizmos.DrawLine(currentObject.aabb[0], currentObject.aabb[1]);
+        Gizmos.DrawLine(currentObject.aabb[1], currentObject.aabb[3]);
+        Gizmos.DrawLine(currentObject.aabb[3], currentObject.aabb[2]);
+        Gizmos.DrawLine(currentObject.aabb[2], currentObject.aabb[0]);
+        Gizmos.DrawLine(currentObject.aabb[0], currentObject.aabb[4]);
+        Gizmos.DrawLine(currentObject.aabb[4], currentObject.aabb[5]);
+        Gizmos.DrawLine(currentObject.aabb[5], currentObject.aabb[7]);
+        Gizmos.DrawLine(currentObject.aabb[7], currentObject.aabb[6]);
+        Gizmos.DrawLine(currentObject.aabb[6], currentObject.aabb[4]);
+        Gizmos.DrawLine(currentObject.aabb[7], currentObject.aabb[3]);
+        Gizmos.DrawLine(currentObject.aabb[6], currentObject.aabb[2]);
+        Gizmos.DrawLine(currentObject.aabb[5], currentObject.aabb[1]);
+
         Gizmos.color = Color.green;
     }
 
-    public void DrawPlane(Vector3 position, Vector3 normal)
-    {
-        Vector3 v3;
-        if (normal.normalized != Vector3.forward)
-            v3 = Vector3.Cross(normal, Vector3.forward).normalized * normal.magnitude;
-        else
-            v3 = Vector3.Cross(normal, Vector3.up).normalized * normal.magnitude; ;
-        var corner0 = position + v3;
-        var corner2 = position - v3;
-        var q = Quaternion.AngleAxis(90.0f, normal);
-        v3 = q * v3;
-        var corner1 = position + v3;
-        var corner3 = position - v3;
-        Debug.DrawLine(corner0, corner2, Color.green);
-        Debug.DrawLine(corner1, corner3, Color.green);
-        Debug.DrawLine(corner0, corner1, Color.green);
-        Debug.DrawLine(corner1, corner2, Color.green);
-        Debug.DrawLine(corner2, corner3, Color.green);
-        Debug.DrawLine(corner3, corner0, Color.green);
-        Debug.DrawRay(position, normal, Color.red);
-    }
 }
