@@ -17,7 +17,10 @@ public class Frustrum : MonoBehaviour
     public struct testObject
     {
         public GameObject gameObject;
+        public MeshRenderer meshRenderer;
         public Vector3[] aabb;
+        public Vector3 v3Extents;
+        public Vector3 scale;
     }
 
     [SerializeField] Vector3 nearTopLeft;
@@ -43,12 +46,19 @@ public class Frustrum : MonoBehaviour
 
     void Start()
     {
+
+
+
         for (int i = 0; i < maxTestObjests; i++)
         {
             testObjets[i].gameObject = TestObjests[i];
+            testObjets[i].meshRenderer = TestObjests[i].GetComponent<MeshRenderer>();
             testObjets[i].aabb = new Vector3[aabbPoints];
+            testObjets[i].v3Extents = testObjets[i].meshRenderer.bounds.extents;
+            testObjets[i].scale = testObjets[i].meshRenderer.bounds.size;
         }
 
+        //Debug.Log("Tamanio  en y :" + testObjets[3].meshRenderer.bounds.size.y);
 
         float halfCameraHeight = cam.farClipPlane * MathF.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
         float CameraWidth = (halfCameraHeight * 2) * cam.aspect;
@@ -103,11 +113,6 @@ public class Frustrum : MonoBehaviour
         {
             planes[i].Flip();
         }
-
-        for (int i = 0; i < maxTestObjests; i++)
-        {
-            SetAABB(ref testObjets[i]);
-        }
         for (int i = 0; i < maxTestObjests; i++)
         {
             CheckObjetColition(testObjets[i]);
@@ -125,6 +130,10 @@ public class Frustrum : MonoBehaviour
         //    rancio = false;
         //}
 
+        for (int i = 0; i < maxTestObjests; i++)
+        {
+            SetAABB(ref testObjets[i]);
+        }
     }
     public void SetNearPoints(Vector3 nearPos)
     {
@@ -158,29 +167,89 @@ public class Frustrum : MonoBehaviour
 
         farBottomRight = farPlaneDistance - (cam.transform.up * halfCameraHeightfar) + (cam.transform.right * CameraHalfWidthFar);
     }
-    public void SetAABB(ref testObject currentObject) 
+    public void SetAABB(ref testObject currentObject)
     {
 
-        Vector3 scale = currentObject.gameObject.transform.localScale / 2;
-        Vector3 forward = currentObject.gameObject.transform.forward;
-        Vector3 up = currentObject.gameObject.transform.up;
-        Vector3 right = currentObject.gameObject.transform.right;
 
-        for (int i = 0; i < aabbPoints; i++)
+        //// Vector3 scale = (currentObject.gameObject.transform.localScale / 2);
+        //
+        //Vector3 scale = (currentObject.meshRenderer.bounds.extents);
+        //
+        ////scale.x *= (currentObject.meshRenderer.bounds.extents.x);
+        ////scale.y *= (currentObject.meshRenderer.bounds.extents.y);
+        ////scale.z *= (currentObject.meshRenderer.bounds.extents.z);
+        //
+        ////Debug.Log("Bound  " + currentObject.meshRenderer.bounds.size);
+        //
+        //Vector3 forward = currentObject.gameObject.transform.forward;
+        //Vector3 up = currentObject.gameObject.transform.up;
+        //Vector3 right = currentObject.gameObject.transform.right;
+        //
+        //for (int i = 0; i < aabbPoints; i++)
+        //{
+        //    currentObject.aabb[i] = currentObject.gameObject.transform.position;
+        //}
+        //
+        //currentObject.aabb[0] += scale.x * right + scale.y * up + scale.z * forward;
+        //currentObject.aabb[1] += scale.x * right + scale.y * up + -scale.z * forward;
+        //currentObject.aabb[2] += scale.x * right + -scale.y * up + scale.z * forward;
+        //currentObject.aabb[3] += scale.x * right + -scale.y * up + -scale.z * forward;
+        //currentObject.aabb[4] += -scale.x * right + scale.y * up + scale.z * forward;
+        //currentObject.aabb[5] += -scale.x * right + scale.y * up + -scale.z * forward;
+        //currentObject.aabb[6] += -scale.x * right + -scale.y * up + scale.z * forward;
+        //currentObject.aabb[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
+
+        Vector3 v3Center = currentObject.meshRenderer.bounds.center;
+        Vector3 v3Extents = currentObject.v3Extents;
+
+        if (currentObject.scale != currentObject.gameObject.transform.localScale)
         {
-            currentObject.aabb[i] = currentObject.gameObject.transform.position;
+            Quaternion rotation = currentObject.gameObject.transform.rotation;
+            currentObject.gameObject.transform.rotation = Quaternion.identity;
+            currentObject.v3Extents = currentObject.meshRenderer.bounds.extents;
+            currentObject.scale = currentObject.gameObject.transform.localScale;
+            currentObject.gameObject.transform.rotation = rotation;
         }
 
-        currentObject.aabb[0] += scale.x * right + scale.y * up + scale.z * forward;
-        currentObject.aabb[1] += scale.x * right + scale.y * up + -scale.z * forward;
-        currentObject.aabb[2] += scale.x * right + -scale.y * up + scale.z * forward;
-        currentObject.aabb[3] += scale.x * right + -scale.y * up + -scale.z * forward;
-        currentObject.aabb[4] += -scale.x * right + scale.y * up + scale.z * forward;
-        currentObject.aabb[5] += -scale.x * right + scale.y * up + -scale.z * forward;
-        currentObject.aabb[6] += -scale.x * right + -scale.y * up + scale.z * forward;
-        currentObject.aabb[7] += -scale.x * right + -scale.y * up + -scale.z * forward;
+        currentObject.aabb[0] = new Vector3(v3Center.x - v3Extents.x, v3Center.y + v3Extents.y, v3Center.z - v3Extents.z);  // Front top left corner
+        currentObject.aabb[1] = new Vector3(v3Center.x + v3Extents.x, v3Center.y + v3Extents.y, v3Center.z - v3Extents.z);  // Front top right corner
+        currentObject.aabb[2] = new Vector3(v3Center.x - v3Extents.x, v3Center.y - v3Extents.y, v3Center.z - v3Extents.z);  // Front bottom left corner
+        currentObject.aabb[3] = new Vector3(v3Center.x + v3Extents.x, v3Center.y - v3Extents.y, v3Center.z - v3Extents.z);  // Front bottom right corner
+        currentObject.aabb[4] = new Vector3(v3Center.x - v3Extents.x, v3Center.y + v3Extents.y, v3Center.z + v3Extents.z);  // Back top left corner
+        currentObject.aabb[5] = new Vector3(v3Center.x + v3Extents.x, v3Center.y + v3Extents.y, v3Center.z + v3Extents.z);  // Back top right corner
+        currentObject.aabb[6] = new Vector3(v3Center.x - v3Extents.x, v3Center.y - v3Extents.y, v3Center.z + v3Extents.z);  // Back bottom left corner
+        currentObject.aabb[7] = new Vector3(v3Center.x + v3Extents.x, v3Center.y - v3Extents.y, v3Center.z + v3Extents.z);  // Back bottom right corner
+
+        currentObject.aabb[0] = transform.TransformPoint(currentObject.aabb[0]);
+        currentObject.aabb[1] = transform.TransformPoint(currentObject.aabb[1]);
+        currentObject.aabb[2] = transform.TransformPoint(currentObject.aabb[2]);
+        currentObject.aabb[3] = transform.TransformPoint(currentObject.aabb[3]);
+        currentObject.aabb[4] = transform.TransformPoint(currentObject.aabb[4]);
+        currentObject.aabb[5] = transform.TransformPoint(currentObject.aabb[5]);
+        currentObject.aabb[6] = transform.TransformPoint(currentObject.aabb[6]);
+        currentObject.aabb[7] = transform.TransformPoint(currentObject.aabb[7]);
+
+        currentObject.aabb[0] = RotatePointAroundPivot(currentObject.aabb[0], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
+        currentObject.aabb[1] = RotatePointAroundPivot(currentObject.aabb[1], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
+        currentObject.aabb[2] = RotatePointAroundPivot(currentObject.aabb[2], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
+        currentObject.aabb[3] = RotatePointAroundPivot(currentObject.aabb[3], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
+        currentObject.aabb[4] = RotatePointAroundPivot(currentObject.aabb[4], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
+        currentObject.aabb[5] = RotatePointAroundPivot(currentObject.aabb[5], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
+        currentObject.aabb[6] = RotatePointAroundPivot(currentObject.aabb[6], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
+        currentObject.aabb[7] = RotatePointAroundPivot(currentObject.aabb[7], currentObject.gameObject.transform.position, currentObject.gameObject.transform.rotation.eulerAngles);
+
+
     }
-    public void CheckObjetColition(testObject currentObject) 
+    public Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Vector3 angles)
+    {
+        Vector3 dir = point - pivot; // get point direction relative to pivot
+        dir = Quaternion.Euler(angles) * dir; // rotate it
+        point = dir + pivot; // calculate rotated point
+        return point; // return it
+    }
+
+
+    public void CheckObjetColition(testObject currentObject)
     {
         bool isInside = false;
 
@@ -245,7 +314,6 @@ public class Frustrum : MonoBehaviour
         {
             DrawAABB(ref testObjets[i]);
         }
-       // Gizmos.DrawLine();
     }
     public void DrawPlane(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
     {
@@ -259,18 +327,17 @@ public class Frustrum : MonoBehaviour
         Gizmos.DrawLine(p2, p4);
         Gizmos.color = Color.green;
     }
-    public void DrawAABB(ref testObject currentObject) 
+    public void DrawAABB(ref testObject currentObject)
     {
 
         Gizmos.color = Color.blue;
 
-        for (int i = 0; i < maxTestObjests; i++)
+
+        for (int i = 0; i < aabbPoints; i++)
         {
-            for (int j = 0; i < aabbPoints; i++)
-            {
-                Gizmos.DrawSphere(currentObject.aabb[i], 0.2f);
-            }
+            Gizmos.DrawSphere(currentObject.aabb[i], 0.05f);
         }
+
         Gizmos.color = Color.green;
     }
 
